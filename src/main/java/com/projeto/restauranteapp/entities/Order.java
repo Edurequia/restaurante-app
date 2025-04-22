@@ -27,7 +27,7 @@ public class Order {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    private Order() {
+    public Order() {
     }
 
     public Order(Long id, Date date, OrderStatus status, List<OrderItem> items, Client client) {

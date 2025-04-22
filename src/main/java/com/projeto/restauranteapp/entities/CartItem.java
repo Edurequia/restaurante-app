@@ -15,6 +15,9 @@ public class CartItem {
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
+    @Column
+    private String customization;
+
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
@@ -64,6 +67,14 @@ public class CartItem {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public String getCustomization() {
+        return customization;
+    }
+
+    public void setCustomization(String customization) {
+        this.customization = customization;
     }
 
     @Override
