@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrinho de Compras</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      main {
+        flex: 1;
+      }
+
+      header {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 15px 0;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-left: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .cart-section {
+        margin: 20px 0;
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .cart-items {
+        margin: 15px 0;
+      }
+
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .cart-item-details {
+        flex: 2;
+      }
+
+      .cart-item-actions {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      .item-notes {
+        font-style: italic;
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .quantity-btn {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #ddd;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .remove-item {
+        background-color: #fa5252;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .cart-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #eee;
+      }
+
+      .empty-cart-message {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+
+      .order-button {
+        background-color: #37b24d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      footer {
+        background-color: #333;
+        color: white;
+        padding: 15px 0;
+        margin-top: 40px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-content p {
+        margin: 0;
+      }
+
+      .admin-link {
+        color: #999;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s ease;
+      }
+
+      .admin-link:hover {
+        color: white;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        position: relative;
+        text-align: center;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .submit-button {
+        background-color: #37b24d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .cart-item {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .cart-item-actions {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .header-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        nav ul {
+          margin-top: 10px;
+        }
+
+        .footer-content {
+          flex-direction: column;
+          gap: 10px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-content">
+        <h1>App Restaurante</h1>
+        <nav>
+          <ul>
+            <li><a th:href="@{/products}">Cardápio</a></li>
+            <li>
+              <a th:href="@{/cart}" id="cart-link"
+                >Carrinho (<span id="cart-count">0</span>)</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <h2>Seu Carrinho</h2>
+
+      <div class="cart-section">
+        <div id="cart-items" class="cart-items">
+          <div class="empty-cart-message">
+            Seu carrinho está vazio.
+            <a th:href="@{/products}">Continuar comprando</a>
+          </div>
+        </div>
+
+        <div id="cart-total" class="cart-total">
+          <span>Total:</span>
+          <span id="total-amount">R$0,00</span>
+        </div>
+
+        <button id="place-order-btn" class="order-button">Fazer Pedido</button>
+        <button
+          id="clear-cart-btn"
+          class="order-button"
+          style="background-color: #fa5252; margin-top: 10px"
+        >
+          Limpar Carrinho
+        </button>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-content">
+        <p>&copy; 2023 App Restaurante. Todos os direitos reservados.</p>
+        <a th:href="@{/admin/login}" class="admin-link"
+          >Painel do Administrador</a
+        >
+      </div>
+    </footer>
+
+    <div id="order-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Confirmação do Pedido</h2>
+        <p>Seu pedido foi realizado com sucesso!</p>
+        <p>Número do pedido: <span id="order-number"></span></p>
+        <button id="back-to-menu" class="submit-button">
+          Voltar ao Cardápio
+        </button>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+      let cart = [];
+      const cartItemsContainer = document.getElementById("cart-items");
+      const totalAmountElement = document.getElementById("total-amount");
+      const cartCountElement = document.getElementById("cart-count");
+      const placeOrderBtn = document.getElementById("place-order-btn");
+      const clearCartBtn = document.getElementById("clear-cart-btn");
+      const orderModal = document.getElementById("order-modal");
+      const closeModalBtn = document.querySelector(".close-modal");
+      const backToMenuBtn = document.getElementById("back-to-menu");
+
+      function renderCartItems(cartData) {
+        cart = cartData;
+
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = `
+              <div class="empty-cart-message">
+                  Seu carrinho está vazio. <a href="/products">Continuar comprando</a>
+              </div>
+          `;
+          placeOrderBtn.disabled = true;
+          placeOrderBtn.style.opacity = 0.5;
+          clearCartBtn.disabled = true;
+          clearCartBtn.style.opacity = 0.5;
+          totalAmountElement.textContent = "R$0,00";
+          return;
+        }
+
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.style.opacity = 1;
+        clearCartBtn.disabled = false;
+        clearCartBtn.style.opacity = 1;
+
+        let cartHTML = "";
+        let total = 0;
+
+        cart.forEach((item, index) => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+
+          cartHTML += `
+              <div class="cart-item">
+                  <div class="cart-item-details">
+                      <h3>${item.name}</h3>
+                      <p>R$${item.price.toFixed(2)} x ${item.quantity}</p>
+                      ${
+                        item.notes
+                          ? `<p class="item-notes">Observação: ${item.notes}</p>`
+                          : ""
+                      }
+                  </div>
+                  <div class="cart-item-actions">
+                      <div class="quantity-controls">
+                          <button class="quantity-btn" data-index="${index}" data-action="decrease">-</button>
+                          <span>${item.quantity}</span>
+                          <button class="quantity-btn" data-index="${index}" data-action="increase">+</button>
+                      </div>
+                      <button class="remove-item" data-index="${index}">Remover</button>
+                  </div>
+              </div>
+          `;
+        });
+
+        cartItemsContainer.innerHTML = cartHTML;
+        totalAmountElement.textContent = `R$${total.toFixed(2)}`;
+
+        document.querySelectorAll(".quantity-btn").forEach((button) => {
+          button.addEventListener("click", handleQuantityChange);
+        });
+
+        document.querySelectorAll(".remove-item").forEach((button) => {
+          button.addEventListener("click", handleRemoveItem);
+        });
+      }
+
+      function loadCart() {
+        fetch("/api/cart")
+          .then((response) => response.json())
+          .then((data) => {
+            renderCartItems(data);
+            updateCartCount();
+          })
+          .catch((error) => {
+            console.error("Erro ao carregar carrinho:", error);
+            renderCartItems([]);
+          });
+      }
+
+      function handleQuantityChange(event) {
+        const index = parseInt(event.target.getAttribute("data-index"));
+        const action = event.target.getAttribute("data-action");
+        const itemId = cart[index].id;
+
+        fetch("/api/cart/update-quantity", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: itemId,
+            action: action,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            renderCartItems(data);
+            updateCartCount();
+          })
+          .catch((error) => {
+            console.error("Erro ao atualizar quantidade:", error);
+          });
+      }
+
+      function handleRemoveItem(event) {
+        const index = parseInt(event.target.getAttribute("data-index"));
+        const itemId = cart[index].id;
+
+        fetch(`/api/cart/remove/${itemId}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            renderCartItems(data);
+            updateCartCount();
+          })
+          .catch((error) => {
+            console.error("Erro ao remover item:", error);
+          });
+      }
+
+      function updateCartCount() {
+        fetch("/api/cart/count")
+          .then((response) => response.json())
+          .then((data) => {
+            cartCountElement.textContent = data.count;
+          })
+          .catch((error) => {
+            console.error("Erro ao atualizar contagem do carrinho:", error);
+            cartCountElement.textContent = cart.length;
+          });
+      }
+
+      placeOrderBtn.addEventListener("click", () => {
+        if (cart.length === 0) return;
+
+        fetch("/api/orders/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ items: cart }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("order-number").textContent =
+              data.orderNumber;
+            orderModal.style.display = "block";
+
+            loadCart();
+          })
+          .catch((error) => {
+            console.error("Erro ao criar pedido:", error);
+            alert(
+              "Ocorreu um erro ao processar seu pedido. Por favor, tente novamente."
+            );
+          });
+      });
+
+      clearCartBtn.addEventListener("click", () => {
+        if (confirm("Tem certeza que deseja limpar o carrinho?")) {
+          fetch("/api/cart/clear", {
+            method: "DELETE",
+          })
+            .then(() => {
+              loadCart();
+            })
+            .catch((error) => {
+              console.error("Erro ao limpar carrinho:", error);
+            });
+        }
+      });
+
+      closeModalBtn.addEventListener("click", () => {
+        orderModal.style.display = "none";
+      });
+
+      backToMenuBtn.addEventListener("click", () => {
+        orderModal.style.display = "none";
+        window.location.href = "/products";
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target === orderModal) {
+          orderModal.style.display = "none";
+        }
+      });
+
+      loadCart();
+    </script>
+  </body>
+</html>

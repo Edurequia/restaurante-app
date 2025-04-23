@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title
+      th:text="${product.id == null ? 'Adicionar Novo Produto' : 'Editar Produto'}"
+    >
+      Formulário de Produto
+    </title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 15px 0;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-left: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .admin-panel {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .admin-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .form-group textarea {
+        min-height: 100px;
+      }
+
+      .product-form {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .back-button {
+        display: inline-block;
+        background-color: #4dabf7;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+
+      .cancel-button {
+        display: inline-block;
+        background-color: #fa5252;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-left: 10px;
+      }
+
+      .submit-button {
+        background-color: #37b24d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      .image-preview {
+        margin: 15px 0;
+        text-align: center;
+      }
+
+      .error-message {
+        color: #fa5252;
+        font-size: 0.85em;
+        display: block;
+        margin-top: 5px;
+      }
+
+      @media (max-width: 768px) {
+        .product-form {
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .header-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        nav ul {
+          margin-top: 10px;
+        }
+
+        .admin-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .back-button {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-content">
+        <h1>App Restaurante - Administrador</h1>
+        <nav>
+          <ul>
+            <li><a th:href="@{/admin/products}">Produtos</a></li>
+            <li><a th:href="@{/products}" target="_blank">Ver Site</a></li>
+            <li><a th:href="@{/admin/logout}">Sair</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="admin-panel">
+        <div class="admin-header">
+          <h2
+            th:text="${product.id == null ? 'Adicionar Novo Produto' : 'Editar Produto'}"
+          >
+            Formulário de Produto
+          </h2>
+          <a th:href="@{/admin/products}" class="back-button"
+            >Voltar para Produtos</a
+          >
+        </div>
+
+        <form
+          th:action="${product.id == null ? '/admin/products/save' : '/admin/products/update'}"
+          th:object="${product}"
+          method="post"
+          class="product-form"
+        >
+          <input type="hidden" th:field="*{id}" />
+
+          <div class="form-group">
+            <label for="code">Código do Produto</label>
+            <input type="text" id="code" th:field="*{code}" required />
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('code')}"
+              th:errors="*{code}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="name">Nome do Produto</label>
+            <input type="text" id="name" th:field="*{name}" required />
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('name')}"
+              th:errors="*{name}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Preço</label>
+            <input
+              type="number"
+              id="price"
+              th:field="*{price}"
+              step="0.01"
+              min="0"
+              required
+            />
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('price')}"
+              th:errors="*{price}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="type">Tipo</label>
+            <select id="type" th:field="*{type}" required>
+              <option value="food">Comida</option>
+              <option value="drink">Bebida</option>
+            </select>
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('type')}"
+              th:errors="*{type}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="imageUrl">URL da Imagem</label>
+            <input type="url" id="imageUrl" th:field="*{imageUrl}" required />
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('imageUrl')}"
+              th:errors="*{imageUrl}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descrição</label>
+            <textarea
+              id="description"
+              th:field="*{description}"
+              rows="4"
+            ></textarea>
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('description')}"
+              th:errors="*{description}"
+            ></small>
+          </div>
+
+          <div class="image-preview">
+            <img
+              id="preview-image"
+              th:src="${product.imageUrl != null and !product.imageUrl.isEmpty() ? product.imageUrl : '#'}"
+              alt="Prévia"
+              style="max-width: 200px; max-height: 200px; display: none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="submit-button"
+            th:text="${product.id == null ? 'Adicionar Produto' : 'Atualizar Produto'}"
+          >
+            Enviar
+          </button>
+          <a th:href="@{/admin/products}" class="cancel-button">Cancelar</a>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const imageUrlInput = document.getElementById("imageUrl");
+      const previewImage = document.getElementById("preview-image");
+
+      // verifica url
+      if (previewImage.getAttribute("src") !== "#") {
+        previewImage.style.display = "block";
+      }
+
+      // atualiza imagem na mudanca de url
+      imageUrlInput.addEventListener("input", function () {
+        const imageUrl = this.value.trim();
+
+        if (imageUrl) {
+          previewImage.src = imageUrl;
+          previewImage.style.display = "block";
+
+          previewImage.onerror = function () {
+            previewImage.style.display = "none";
+            alert("URL de imagem inválida ou a imagem não pode ser carregada.");
+          };
+        } else {
+          previewImage.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

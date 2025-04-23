@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrador - Gerenciar Produtos</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 15px 0;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-left: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .admin-panel {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .admin-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .add-product-button {
+        background-color: #37b24d;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .filter-buttons {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+      }
+
+      .filter-button {
+        padding: 8px 16px;
+        background-color: #4dabf7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .filter-button.active {
+        background-color: #1971c2;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background-color: #f5f5f5;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .edit-button {
+        background-color: #4dabf7;
+        color: white;
+      }
+
+      .delete-button {
+        background-color: #fa5252;
+        color: white;
+      }
+
+      .success-message {
+        background-color: #d3f9d8;
+        border: 1px solid #8ce99a;
+        color: #2b8a3e;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .empty-table-message {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+
+      @media (max-width: 768px) {
+        table {
+          display: block;
+          overflow-x: auto;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .header-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        nav ul {
+          margin-top: 10px;
+        }
+
+        .admin-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-content">
+        <h1>App Restaurante - Administrador</h1>
+        <nav>
+          <ul>
+            <li><a th:href="@{/admin/products}">Produtos</a></li>
+            <li><a th:href="@{/products}" target="_blank">Ver Site</a></li>
+            <li><a th:href="@{/admin/logout}">Sair</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="admin-panel">
+        <div class="admin-header">
+          <h2>Gerenciar Produtos</h2>
+          <a th:href="@{/admin/products/new}" class="add-product-button"
+            >Adicionar Novo Produto</a
+          >
+        </div>
+
+        <div class="filter-buttons">
+          <button class="filter-button active" data-filter="all">
+            Todos os Produtos
+          </button>
+          <button class="filter-button" data-filter="food">Comidas</button>
+          <button class="filter-button" data-filter="drink">Bebidas</button>
+        </div>
+
+        <div th:if="${successMessage}" class="success-message">
+          <p th:text="${successMessage}"></p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Imagem</th>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Tipo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="product : ${products}" th:data-type="${product.type}">
+              <td th:text="${product.id}">1</td>
+              <td>
+                <img
+                  th:src="${product.imageUrl}"
+                  alt="Imagem do Produto"
+                  style="width: 50px; height: 50px; object-fit: cover"
+                />
+              </td>
+              <td th:text="${product.code}">P001</td>
+              <td th:text="${product.name}">Nome do Produto</td>
+              <td th:text="${'R$' + product.price}">R$9,99</td>
+              <td th:text="${product.type}">comida</td>
+              <td class="action-buttons">
+                <a
+                  th:href="@{/admin/products/edit/{id}(id=${product.id})}"
+                  class="action-button edit-button"
+                  >Editar</a
+                >
+                <a
+                  th:href="@{/admin/products/delete/{id}(id=${product.id})}"
+                  class="action-button delete-button"
+                  onclick="return confirm('Tem certeza que deseja excluir este produto?')"
+                  >Excluir</a
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(products)}" class="empty-table-message">
+          <p>
+            Nenhum produto encontrado. Clique em "Adicionar Novo Produto" para
+            criar um.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <script th:inline="javascript">
+      // filtros
+      document.querySelectorAll(".filter-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".filter-button.active")
+            .classList.remove("active");
+          button.classList.add("active");
+
+          const filter = button.getAttribute("data-filter");
+          const rows = document.querySelectorAll("tbody tr");
+
+          rows.forEach((row) => {
+            if (filter === "all" || row.getAttribute("data-type") === filter) {
+              row.style.display = "table-row";
+            } else {
+              row.style.display = "none";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
