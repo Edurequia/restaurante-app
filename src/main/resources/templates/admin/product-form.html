@@ -171,11 +171,11 @@
   <body>
     <header>
       <div class="container header-content">
-        <h1>App Restaurante - Administrador</h1>
+        <h1>Burger Shot - Administrador</h1>
         <nav>
           <ul>
-            <li><a th:href="@{/admin/products}">Produtos</a></li>
-            <li><a th:href="@{/products}" target="_blank">Ver Site</a></li>
+            <li><a th:href="@{/admin/products}">Estoque</a></li>
+            <li><a th:href="@{/products}" target="_blank">Cardápio</a></li>
             <li><a th:href="@{/admin/logout}">Sair</a></li>
           </ul>
         </nav>
@@ -193,6 +193,22 @@
           <a th:href="@{/admin/products}" class="back-button"
             >Voltar para Produtos</a
           >
+        </div>
+
+        <!-- Error Message Display -->
+        <div
+          th:if="${errorMessage}"
+          class="error-alert"
+          style="
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+          "
+        >
+          <p th:text="${errorMessage}">Mensagem de erro</p>
         </div>
 
         <form
@@ -250,6 +266,20 @@
               class="error-message"
               th:if="${#fields.hasErrors('type')}"
               th:errors="*{type}"
+            ></small>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Categoria</label>
+            <select id="category" th:field="*{category}" required>
+              <option value="HAMBURGUER">Hambúrguer</option>
+              <option value="SOBREMESA">Sobremesa</option>
+              <option value="BEBIDA">Bebida</option>
+            </select>
+            <small
+              class="error-message"
+              th:if="${#fields.hasErrors('category')}"
+              th:errors="*{category}"
             ></small>
           </div>
 

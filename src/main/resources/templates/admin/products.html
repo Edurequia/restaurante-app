@@ -182,11 +182,12 @@
   <body>
     <header>
       <div class="container header-content">
-        <h1>App Restaurante - Administrador</h1>
+        <h1>Burger Shot - Administrador</h1>
         <nav>
           <ul>
-            <li><a th:href="@{/admin/products}">Produtos</a></li>
-            <li><a th:href="@{/products}" target="_blank">Ver Site</a></li>
+            <li><a th:href="@{/admin/products}" class="active">Estoque</a></li>
+            <li><a th:href="@{/admin/orders}">Pedidos</a></li>
+            <li><a th:href="@{/products}" target="_blank">Cardápio</a></li>
             <li><a th:href="@{/admin/logout}">Sair</a></li>
           </ul>
         </nav>

@@ -60,10 +60,21 @@
       }
 
       /* Filter Buttons */
-      .filter-buttons {
+      .filter-section {
         margin: 20px 0;
+      }
+
+      .filter-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .filter-buttons {
         display: flex;
         gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
       }
 
       .filter-button {
@@ -79,12 +90,21 @@
         background-color: #1971c2;
       }
 
+      .filter-button.category {
+        background-color: #f783ac;
+      }
+
+      .filter-button.category.active {
+        background-color: #e64980;
+      }
+
       /* Product Cards */
       .product-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 20px;
         margin-top: 20px;
+        width: 100%;
       }
 
       .product-card {
@@ -93,6 +113,8 @@
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
+        height: auto;
+        max-width: 100%;
       }
 
       .product-card:hover {
@@ -244,18 +266,37 @@
           text-align: center;
         }
       }
+
+      /* Additional media query for larger screens */
+      @media (min-width: 992px) {
+        .product-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      /* Additional media query for extra large screens */
+      @media (min-width: 1200px) {
+        .product-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
     </style>
   </head>
   <body>
     <header>
       <div class="container header-content">
-        <h1>App Restaurante</h1>
+        <h1>Fumaça & Sabor</h1>
         <nav>
           <ul>
+            <li><a th:href="@{/}">Início</a></li>
             <li><a th:href="@{/products}">Cardápio</a></li>
             <li>
               <a th:href="@{/cart}" id="cart-link"
-                >Carrinho (<span id="cart-count">0</span>)</a
+                >Carrinho (<span
+                  id="cart-count"
+                  th:text="${session.cart != null ? session.cart.size() : 0}"
+                  >0</span
+                >)</a
               >
             </li>
           </ul>
@@ -264,12 +305,44 @@
     </header>
 
     <main class="container">
-      <div class="filter-buttons">
-        <button class="filter-button active" data-filter="all">
-          Todos os Produtos
-        </button>
-        <button class="filter-button" data-filter="food">Comidas</button>
-        <button class="filter-button" data-filter="drink">Bebidas</button>
+      <div class="filter-section">
+        <p class="filter-title">Filtrar por tipo:</p>
+        <div class="filter-buttons type-filters">
+          <button class="filter-button type active" data-filter-type="all">
+            Todos os Produtos
+          </button>
+          <button class="filter-button type" data-filter-type="food">
+            Comidas
+          </button>
+          <button class="filter-button type" data-filter-type="drink">
+            Bebidas
+          </button>
+        </div>
+
+        <p class="filter-title">Filtrar por categoria:</p>
+        <div class="filter-buttons category-filters">
+          <button
+            class="filter-button category active"
+            data-filter-category="all"
+          >
+            Todas as Categorias
+          </button>
+          <button
+            class="filter-button category"
+            data-filter-category="HAMBURGUER"
+          >
+            Hambúrgueres
+          </button>
+          <button
+            class="filter-button category"
+            data-filter-category="SOBREMESA"
+          >
+            Sobremesas
+          </button>
+          <button class="filter-button category" data-filter-category="BEBIDA">
+            Bebidas
+          </button>
+        </div>
       </div>
 
       <div class="product-grid">
@@ -278,6 +351,7 @@
           th:each="product : ${products}"
           class="product-card"
           th:data-type="${product.type}"
+          th:data-category="${product.category}"
         >
           <img
             th:src="${product.imageUrl}"
@@ -306,7 +380,13 @@
 
     <footer>
       <div class="container footer-content">
-        <p>&copy; 2023 App Restaurante. Todos os direitos reservados.</p>
+        <div style="display: flex; flex-direction: column">
+          <p>&copy; 2023 Fumaça & Sabor. Todos os direitos reservados.</p>
+          <p style="font-size: 12px; color: #999; margin-top: 5px">
+            Fumaça & Sabor é uma marca fictícia criada para fins educacionais.
+            Este é apenas um projeto educacional sem fins comerciais.
+          </p>
+        </div>
         <a th:href="@{/admin/login}" class="admin-link"
           >Painel do Administrador</a
         >
@@ -318,45 +398,79 @@
         <span class="close-modal">&times;</span>
         <h2 id="modal-product-name">Nome do Produto</h2>
         <p id="modal-product-price">R$0,00</p>
-        <div class="form-group">
-          <label for="product-notes">Instruções Especiais:</label>
-          <textarea
-            id="product-notes"
-            placeholder="Ex.: Sem mostarda, queijo extra, etc."
-          ></textarea>
-        </div>
-        <button id="add-to-cart-with-notes" class="submit-button">
-          Adicionar ao Carrinho
-        </button>
+        <form th:action="@{/cart/add}" method="post">
+          <input type="hidden" id="productId" name="productId" value="" />
+          <input type="hidden" id="quantity" name="quantity" value="1" />
+
+          <div class="form-group">
+            <label for="customization">Instruções Especiais:</label>
+            <textarea
+              id="customization"
+              name="customization"
+              placeholder="Ex.: Sem mostarda, queijo extra, etc."
+            ></textarea>
+          </div>
+          <button type="submit" class="submit-button">
+            Adicionar ao Carrinho
+          </button>
+        </form>
       </div>
     </div>
 
     <script th:inline="javascript">
       let cart = [];
+      let currentTypeFilter = "all";
+      let currentCategoryFilter = "all";
+
       updateCartCount();
 
-      document.querySelectorAll(".filter-button").forEach((button) => {
+      // Type filter functionality
+      document.querySelectorAll(".filter-button.type").forEach((button) => {
         button.addEventListener("click", () => {
           document
-            .querySelector(".filter-button.active")
+            .querySelector(".filter-button.type.active")
             .classList.remove("active");
           button.classList.add("active");
 
-          const filter = button.getAttribute("data-filter");
-          const products = document.querySelectorAll(".product-card");
-
-          products.forEach((product) => {
-            if (
-              filter === "all" ||
-              product.getAttribute("data-type") === filter
-            ) {
-              product.style.display = "block";
-            } else {
-              product.style.display = "none";
-            }
-          });
+          currentTypeFilter = button.getAttribute("data-filter-type");
+          applyFilters();
         });
       });
+
+      // Category filter functionality
+      document.querySelectorAll(".filter-button.category").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".filter-button.category.active")
+            .classList.remove("active");
+          button.classList.add("active");
+
+          currentCategoryFilter = button.getAttribute("data-filter-category");
+          applyFilters();
+        });
+      });
+
+      // Apply both filters
+      function applyFilters() {
+        const products = document.querySelectorAll(".product-card");
+
+        products.forEach((product) => {
+          const productType = product.getAttribute("data-type");
+          const productCategory = product.getAttribute("data-category");
+
+          const typeMatches =
+            currentTypeFilter === "all" || productType === currentTypeFilter;
+          const categoryMatches =
+            currentCategoryFilter === "all" ||
+            productCategory === currentCategoryFilter;
+
+          if (typeMatches && categoryMatches) {
+            product.style.display = "";
+          } else {
+            product.style.display = "none";
+          }
+        });
+      }
 
       const modal = document.getElementById("product-modal");
       const closeModalBtn = document.querySelector(".close-modal");
@@ -383,60 +497,20 @@
           document.getElementById(
             "modal-product-price"
           ).textContent = `R$${currentProductPrice.toFixed(2)}`;
-          document.getElementById("product-notes").value = "";
+          document.getElementById("customization").value = "";
+          document.getElementById("productId").value = currentProductId;
 
           modal.style.display = "block";
         });
       });
 
-      document
-        .getElementById("add-to-cart-with-notes")
-        .addEventListener("click", () => {
-          const notes = document.getElementById("product-notes").value;
-
-          cart.push({
-            id: currentProductId,
-            name: currentProductName,
-            price: currentProductPrice,
-            notes: notes,
-            quantity: 1,
-          });
-
-          fetch("/api/cart/add", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: currentProductId,
-              name: currentProductName,
-              price: currentProductPrice,
-              notes: notes,
-              quantity: 1,
-            }),
-          })
-            .then((response) => {
-              if (response.ok) {
-                updateCartCount();
-                modal.style.display = "none";
-                alert(`${currentProductName} adicionado ao carrinho!`);
-              }
-            })
-            .catch((error) => {
-              console.error("Erro ao adicionar ao carrinho:", error);
-            });
-        });
-
+      // Simple function to update cart count
       function updateCartCount() {
-        fetch("/api/cart/count")
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("cart-count").textContent = data.count;
-          })
-          .catch((error) => {
-            console.error("Erro ao atualizar contagem do carrinho:", error);
-            document.getElementById("cart-count").textContent = cart.length;
-          });
+        // This would ideally get the count from the server
+        // but for simplicity we'll just set it to the cart length
+        document.getElementById(
+          "cart-count"
+        ).textContent = /*[[${session.cart != null ? session.cart.size() : 0}]]*/ 0;
       }
     </script>
   </body>

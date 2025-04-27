@@ -249,15 +249,12 @@
   <body>
     <header>
       <div class="container header-content">
-        <h1>App Restaurante</h1>
+        <h1>Fumaça & Sabor</h1>
         <nav>
           <ul>
+            <li><a th:href="@{/}">Início</a></li>
             <li><a th:href="@{/products}">Cardápio</a></li>
-            <li>
-              <a th:href="@{/cart}" id="cart-link"
-                >Carrinho (<span id="cart-count">0</span>)</a
-              >
-            </li>
+            <li><a th:href="@{/cart}" class="active">Carrinho</a></li>
           </ul>
         </nav>
       </div>
@@ -267,32 +264,107 @@
       <h2>Seu Carrinho</h2>
 
       <div class="cart-section">
-        <div id="cart-items" class="cart-items">
-          <div class="empty-cart-message">
+        <div class="cart-items">
+          <!-- Empty cart message -->
+          <div class="empty-cart-message" th:if="${cart.isEmpty()}">
             Seu carrinho está vazio.
             <a th:href="@{/products}">Continuar comprando</a>
           </div>
+
+          <!-- Cart items -->
+          <div
+            th:if="${!cart.isEmpty()}"
+            th:each="item : ${cart}"
+            class="cart-item"
+          >
+            <div class="cart-item-details">
+              <h3 th:text="${item.product.name}">Nome do Produto</h3>
+              <p th:text="${'R$' + item.product.price}">R$0,00</p>
+              <p
+                class="item-notes"
+                th:if="${item.customization != null and !item.customization.isEmpty()}"
+                th:text="${'Instruções: ' + item.customization}"
+              >
+                Instruções especiais
+              </p>
+            </div>
+            <div class="cart-item-actions">
+              <div class="quantity-controls">
+                <form
+                  th:action="@{/cart/update}"
+                  method="post"
+                  style="display: flex; align-items: center"
+                >
+                  <input
+                    type="hidden"
+                    name="productId"
+                    th:value="${item.product.id}"
+                  />
+                  <input
+                    type="number"
+                    name="quantity"
+                    th:value="${item.quantity}"
+                    min="1"
+                    style="width: 50px; text-align: center"
+                  />
+                  <button
+                    type="submit"
+                    class="quantity-btn"
+                    style="margin-left: 5px"
+                  >
+                    ✓
+                  </button>
+                </form>
+              </div>
+              <form th:action="@{/cart/remove}" method="post">
+                <input
+                  type="hidden"
+                  name="productId"
+                  th:value="${item.product.id}"
+                />
+                <button type="submit" class="remove-item">Remover</button>
+              </form>
+            </div>
+          </div>
         </div>
 
-        <div id="cart-total" class="cart-total">
+        <div class="cart-total" th:if="${!cart.isEmpty()}">
           <span>Total:</span>
-          <span id="total-amount">R$0,00</span>
+          <span
+            th:text="${'R$' + #aggregates.sum(cart.![product.price * quantity])}"
+            >R$0,00</span
+          >
         </div>
 
-        <button id="place-order-btn" class="order-button">Fazer Pedido</button>
-        <button
-          id="clear-cart-btn"
-          class="order-button"
-          style="background-color: #fa5252; margin-top: 10px"
+        <form th:if="${!cart.isEmpty()}" th:action="@{/orders}" method="post">
+          <button type="submit" class="order-button">Fazer Pedido</button>
+        </form>
+
+        <form
+          th:if="${!cart.isEmpty()}"
+          th:action="@{/cart/clear}"
+          method="post"
         >
-          Limpar Carrinho
-        </button>
+          <button
+            type="submit"
+            class="order-button"
+            style="background-color: #fa5252; margin-top: 10px"
+          >
+            Limpar Carrinho
+          </button>
+        </form>
       </div>
     </main>
 
     <footer>
       <div class="container footer-content">
-        <p>&copy; 2023 App Restaurante. Todos os direitos reservados.</p>
+        <div>
+          <p>&copy; 2023 Fumaça & Sabor. Todos os direitos reservados.</p>
+          <p style="font-size: 12px; color: #aaa; margin-top: 5px">
+            Fumaça & Sabor é uma marca fictícia criada para fins educacionais.
+            Este projeto é apenas para demonstração e aprendizado.
+          </p>
+        </div>
         <a th:href="@{/admin/login}" class="admin-link"
           >Painel do Administrador</a
         >
@@ -348,27 +420,41 @@
         let total = 0;
 
         cart.forEach((item, index) => {
-          const itemTotal = item.price * item.quantity;
+          const itemTotal = item.product.price * item.quantity;
           total += itemTotal;
 
           cartHTML += `
               <div class="cart-item">
                   <div class="cart-item-details">
-                      <h3>${item.name}</h3>
-                      <p>R$${item.price.toFixed(2)} x ${item.quantity}</p>
+                      <h3>${item.product.name}</h3>
+                      <p>R$${item.product.price.toFixed(2)} x ${
+            item.quantity
+          }</p>
                       ${
-                        item.notes
-                          ? `<p class="item-notes">Observação: ${item.notes}</p>`
+                        item.customization
+                          ? `<p class="item-notes">Instruções: ${item.customization}</p>`
                           : ""
                       }
                   </div>
                   <div class="cart-item-actions">
                       <div class="quantity-controls">
-                          <button class="quantity-btn" data-index="${index}" data-action="decrease">-</button>
-                          <span>${item.quantity}</span>
-                          <button class="quantity-btn" data-index="${index}" data-action="increase">+</button>
+                          <form th:action="@{/cart/update}" method="post" style="display: flex; align-items: center;">
+                              <input type="hidden" name="productId" th:value="${
+                                item.product.id
+                              }" />
+                              <input type="number" name="quantity" th:value="${
+                                item.quantity
+                              }" 
+                                     min="1" style="width: 50px; text-align: center;" />
+                              <button type="submit" class="quantity-btn" style="margin-left: 5px;">✓</button>
+                          </form>
                       </div>
-                      <button class="remove-item" data-index="${index}">Remover</button>
+                      <form th:action="@{/cart/remove}" method="post">
+                          <input type="hidden" name="productId" th:value="${
+                            item.product.id
+                          }" />
+                          <button type="submit" class="remove-item">Remover</button>
+                      </form>
                   </div>
               </div>
           `;
@@ -402,7 +488,7 @@
       function handleQuantityChange(event) {
         const index = parseInt(event.target.getAttribute("data-index"));
         const action = event.target.getAttribute("data-action");
-        const itemId = cart[index].id;
+        const itemId = cart[index].product.id;
 
         fetch("/api/cart/update-quantity", {
           method: "POST",
@@ -426,7 +512,7 @@
 
       function handleRemoveItem(event) {
         const index = parseInt(event.target.getAttribute("data-index"));
-        const itemId = cart[index].id;
+        const itemId = cart[index].product.id;
 
         fetch(`/api/cart/remove/${itemId}`, {
           method: "DELETE",
