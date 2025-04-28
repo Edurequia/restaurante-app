@@ -171,7 +171,7 @@
   <body>
     <header>
       <div class="container header-content">
-        <h1>Burger Shot - Administrador</h1>
+        <h1>Fumaça & Sabor - Administrador</h1>
         <nav>
           <ul>
             <li><a th:href="@{/admin/products}">Estoque</a></li>
@@ -195,7 +195,6 @@
           >
         </div>
 
-        <!-- Error Message Display -->
         <div
           th:if="${errorMessage}"
           class="error-alert"
@@ -332,12 +331,10 @@
       const imageUrlInput = document.getElementById("imageUrl");
       const previewImage = document.getElementById("preview-image");
 
-      // verifica url
       if (previewImage.getAttribute("src") !== "#") {
         previewImage.style.display = "block";
       }
 
-      // atualiza imagem na mudanca de url
       imageUrlInput.addEventListener("input", function () {
         const imageUrl = this.value.trim();
 

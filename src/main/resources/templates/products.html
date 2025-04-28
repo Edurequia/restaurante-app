@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cardápio do Restaurante</title>
     <style>
-      /* Global Styles */
       * {
         margin: 0;
         padding: 0;
@@ -31,7 +30,6 @@
         flex: 1;
       }
 
-      /* Header */
       header {
         background-color: #ff6b6b;
         color: white;
@@ -59,7 +57,6 @@
         font-weight: bold;
       }
 
-      /* Filter Buttons */
       .filter-section {
         margin: 20px 0;
       }
@@ -98,7 +95,6 @@
         background-color: #e64980;
       }
 
-      /* Product Cards */
       .product-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -152,7 +148,6 @@
         width: 100%;
       }
 
-      /* Form Styles */
       .form-group {
         margin-bottom: 15px;
       }
@@ -181,7 +176,6 @@
         margin-top: 10px;
       }
 
-      /* Footer Styles */
       footer {
         background-color: #333;
         color: white;
@@ -210,7 +204,6 @@
         color: white;
       }
 
-      /* Modal Styles */
       .modal {
         display: none;
         position: fixed;
@@ -239,7 +232,6 @@
         cursor: pointer;
       }
 
-      /* Responsive Styles */
       @media (max-width: 768px) {
         .product-grid {
           grid-template-columns: repeat(2, 1fr);
@@ -267,14 +259,12 @@
         }
       }
 
-      /* Additional media query for larger screens */
       @media (min-width: 992px) {
         .product-grid {
           grid-template-columns: repeat(3, 1fr);
         }
       }
 
-      /* Additional media query for extra large screens */
       @media (min-width: 1200px) {
         .product-grid {
           grid-template-columns: repeat(4, 1fr);
@@ -346,7 +336,6 @@
       </div>
 
       <div class="product-grid">
-        <!-- Product cards will be displayed here -->
         <div
           th:each="product : ${products}"
           class="product-card"
@@ -424,7 +413,6 @@
 
       updateCartCount();
 
-      // Type filter functionality
       document.querySelectorAll(".filter-button.type").forEach((button) => {
         button.addEventListener("click", () => {
           document
@@ -437,7 +425,6 @@
         });
       });
 
-      // Category filter functionality
       document.querySelectorAll(".filter-button.category").forEach((button) => {
         button.addEventListener("click", () => {
           document
@@ -450,7 +437,6 @@
         });
       });
 
-      // Apply both filters
       function applyFilters() {
         const products = document.querySelectorAll(".product-card");
 
@@ -504,10 +490,7 @@
         });
       });
 
-      // Simple function to update cart count
       function updateCartCount() {
-        // This would ideally get the count from the server
-        // but for simplicity we'll just set it to the cart length
         document.getElementById(
           "cart-count"
         ).textContent = /*[[${session.cart != null ? session.cart.size() : 0}]]*/ 0;

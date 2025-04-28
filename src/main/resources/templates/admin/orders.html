@@ -3,8 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Changed from automatic refresh to JavaScript-based refresh to avoid committed response issues -->
-    <!-- <meta http-equiv="refresh" content="15" /> -->
     <title>Gerenciamento de Pedidos</title>
     <style>
       * {
@@ -79,14 +77,12 @@
         text-decoration: none;
       }
 
-      /* Clock display */
       #clock {
         font-size: 1.2em;
         font-weight: bold;
         margin-left: 15px;
       }
 
-      /* Tabs for navigation between views */
       .tabs {
         display: flex;
         border-bottom: 1px solid #eee;
@@ -107,7 +103,6 @@
         border-bottom: none;
       }
 
-      /* Order Management styles */
       .orders-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -226,7 +221,6 @@
         background-color: #fa5252;
       }
 
-      /* Kitchen Display styles */
       .ticket-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -382,7 +376,6 @@
         display: block;
       }
 
-      /* Modal */
       .modal {
         display: none;
         position: fixed;
@@ -463,7 +456,6 @@
         width: 100%;
       }
 
-      /* Responsive styles */
       @media (max-width: 768px) {
         .orders-grid,
         .ticket-grid {
@@ -491,7 +483,7 @@
   <body>
     <header>
       <div class="container header-content">
-        <h1>Burger Shot - Administrador</h1>
+        <h1>Fumaça & Sabor - Administrador</h1>
         <nav>
           <ul>
             <li><a th:href="@{/admin/products}">Produtos</a></li>
@@ -521,12 +513,10 @@
           </div>
         </div>
 
-        <!-- Success Message Display -->
         <div th:if="${successMessage}" class="success-message">
           <p th:text="${successMessage}"></p>
         </div>
 
-        <!-- Error Message Display -->
         <div th:if="${errorMessage}" class="error-message">
           <p th:text="${errorMessage}"></p>
         </div>
@@ -536,7 +526,6 @@
           <div class="tab" data-view="kitchen">Cozinha</div>
         </div>
 
-        <!-- Orders View -->
         <div id="orders-view" class="view-container active">
           <div th:if="${#lists.isEmpty(orders)}" class="empty-message">
             <h2>Sem pedidos</h2>
@@ -559,12 +548,6 @@
                 >
               </div>
               <div class="order-details">
-                <p
-                  class="customer-info"
-                  th:text="${order.client != null} ? 'Mesa ' + ${order.client.tableNumber} : 'Mesa não definida'"
-                >
-                  Mesa 15
-                </p>
                 <ul class="order-items-list">
                   <li
                     th:if="${order.items != null}"
@@ -604,7 +587,6 @@
           </div>
         </div>
 
-        <!-- Kitchen View -->
         <div id="kitchen-view" class="view-container">
           <div
             th:if="${activeTickets == null || #lists.isEmpty(activeTickets)}"
@@ -626,12 +608,6 @@
                     th:text="'Pedido #' + ${ticket.order != null ? ticket.order.id : 'N/A'}"
                   >
                     Pedido #123
-                  </div>
-                  <div
-                    class="ticket-table"
-                    th:text="${ticket.order != null && ticket.order.client != null} ? 'Mesa ' + ${ticket.order.client.tableNumber} : 'Mesa não definida'"
-                  >
-                    Mesa 10
                   </div>
                 </div>
                 <div
@@ -719,28 +695,21 @@
       </div>
     </main>
 
-    <!-- Remove problematic script reference and include all scripts directly -->
-    <!-- <script th:replace="~{fragments/scripts :: scripts}"></script> -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Set up the refresh timer - now 30 seconds to reduce server load
-        const refreshInterval = 10; // seconds
+        const refreshInterval = 10;
         let timeLeft = refreshInterval;
 
-        // Update clock
         function updateClock() {
           const now = new Date();
           const timeStr = now.toLocaleTimeString();
           document.getElementById("clock").textContent = timeStr;
         }
 
-        // Initial clock update
         updateClock();
 
-        // Update clock every second
         setInterval(updateClock, 1000);
 
-        // Set up refresh button to preserve hash
         document
           .getElementById("refresh-button")
           .addEventListener("click", function (e) {
@@ -749,12 +718,9 @@
             window.location.href = window.location.pathname + currentHash;
           });
 
-        // Update refresh countdown
         setInterval(function () {
           timeLeft -= 1;
           if (timeLeft <= 0) {
-            // Instead of meta refresh, use JavaScript to reload the page
-            // Preserve the current hash when reloading
             const currentHash = window.location.hash;
             window.location.href = window.location.pathname + currentHash;
             document.getElementById("last-refresh").textContent = "agora";
@@ -765,31 +731,24 @@
           }
         }, 1000);
 
-        // Tab switching functionality
         const tabs = document.querySelectorAll(".tab");
         const viewContainers = document.querySelectorAll(".view-container");
 
-        // Function to activate a specific tab
         function activateTab(tabName) {
-          // Remove active class from all tabs
           tabs.forEach((t) => t.classList.remove("active"));
 
-          // Add active class to the specified tab
           tabs.forEach((tab) => {
             if (tab.getAttribute("data-view") === tabName) {
               tab.classList.add("active");
             }
           });
 
-          // Hide all view containers
           viewContainers.forEach((container) => {
             container.classList.remove("active");
           });
 
-          // Show the selected view container
           document.getElementById(tabName + "-view").classList.add("active");
 
-          // Update URL hash without triggering a page reload
           if (history.pushState) {
             history.pushState(null, null, "#" + tabName);
           } else {
@@ -797,18 +756,15 @@
           }
         }
 
-        // Handle tab clicks
         tabs.forEach((tab) => {
           tab.addEventListener("click", function () {
-            // Get the view to show
             const viewToShow = this.getAttribute("data-view");
             activateTab(viewToShow);
           });
         });
 
-        // Check URL hash for active tab on page load
         if (window.location.hash) {
-          const tabName = window.location.hash.substring(1); // Remove the # character
+          const tabName = window.location.hash.substring(1);
           if (tabName === "kitchen" || tabName === "orders") {
             activateTab(tabName);
           }

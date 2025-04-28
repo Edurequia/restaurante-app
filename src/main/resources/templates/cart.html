@@ -174,7 +174,6 @@
         color: white;
       }
 
-      /* Modal Styles */
       .modal {
         display: none;
         position: fixed;
@@ -265,13 +264,11 @@
 
       <div class="cart-section">
         <div class="cart-items">
-          <!-- Empty cart message -->
           <div class="empty-cart-message" th:if="${cart.isEmpty()}">
             Seu carrinho está vazio.
             <a th:href="@{/products}">Continuar comprando</a>
           </div>
 
-          <!-- Cart items -->
           <div
             th:if="${!cart.isEmpty()}"
             th:each="item : ${cart}"

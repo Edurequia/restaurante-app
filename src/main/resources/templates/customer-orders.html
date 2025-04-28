@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mesa - Fumaça & Sabor</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      main {
+        flex: 1;
+      }
+
+      header {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 15px 0;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-left: 20px;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .table-selection {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .table-selection h3 {
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+      }
+
+      .table-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+      }
+
+      .table-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .table-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        border-color: #ff6b6b;
+      }
+
+      .table-card.active {
+        background-color: #ffe8e8;
+        border-color: #ff6b6b;
+      }
+
+      .table-number {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #ff6b6b;
+        color: white;
+        border-radius: 50%;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .table-info {
+        margin-bottom: 30px;
+      }
+
+      .info-card {
+        background-color: #f0f8ff;
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 4px solid #4dabf7;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .info-card h3 {
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .table-example {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .table-number-example {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #ff6b6b;
+        color: white;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 15px;
+      }
+
+      .orders-section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .order-number {
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .order-date {
+        color: #666;
+      }
+
+      .order-status {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+      }
+
+      .status-pending {
+        background-color: #ffec99;
+        color: #e67700;
+      }
+
+      .status-canceled {
+        background-color: #ffa8a8;
+        color: #c92a2a;
+      }
+
+      .status-completed {
+        background-color: #b2f2bb;
+        color: #2b8a3e;
+      }
+
+      .order-items {
+        margin-bottom: 15px;
+      }
+
+      .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+      }
+
+      .item-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .item-customization {
+        font-size: 14px;
+        color: #666;
+        font-style: italic;
+        margin-top: 5px;
+      }
+
+      .order-total {
+        text-align: right;
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 15px;
+      }
+
+      .no-orders {
+        text-align: center;
+        padding: 30px;
+        color: #666;
+      }
+
+      .table-summary {
+        margin-bottom: 20px;
+        background-color: #fff3f3;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #ff6b6b;
+      }
+
+      footer {
+        background-color: #333;
+        color: white;
+        padding: 15px 0;
+        margin-top: 40px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-content p {
+        margin: 0;
+      }
+
+      .admin-link {
+        color: #999;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s ease;
+      }
+
+      .admin-link:hover {
+        color: white;
+      }
+
+      @media (max-width: 768px) {
+        .table-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .order-header {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .table-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .header-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        nav ul {
+          margin-top: 10px;
+        }
+
+        .footer-content {
+          flex-direction: column;
+          gap: 10px;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-content">
+        <h1>Fumaça & Sabor</h1>
+        <nav>
+          <ul>
+            <li><a th:href="@{/}">Início</a></li>
+            <li><a th:href="@{/products}">Cardápio</a></li>
+            <li>
+              <a th:href="@{/cart}" id="cart-link"
+                >Carrinho (<span
+                  id="cart-count"
+                  th:text="${session.cart != null ? session.cart.size() : 0}"
+                  >0</span
+                >)</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="table-info">
+        <div class="info-card">
+          <p></p>
+          <div class="table-example">
+            <div class="table-number-example"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-selection">
+        <div class="table-grid">
+          <a
+            th:each="i : ${#numbers.sequence(1, 16)}"
+            th:href="@{/customer/orders(tableNumber=${i})}"
+            class="table-card"
+            th:classappend="${tableNumber == i ? 'active' : ''}"
+          >
+            <div class="table-number">
+              <span th:text="${i}">1</span>
+            </div>
+            <p th:text="'Mesa ' + ${i}">Mesa 1</p>
+          </a>
+        </div>
+      </div>
+
+      <div class="table-summary" th:if="${tableNumber != null}">
+        <h3 th:text="'Mesa ' + ${tableNumber}">Mesa</h3>
+        <p
+          th:if="${totalAmount != null}"
+          th:text="'Valor Total: R$' + ${#numbers.formatDecimal(totalAmount, 1, 2)}"
+        >
+          R$0,00
+        </p>
+      </div>
+
+      <div class="orders-section">
+        <div class="no-orders" th:if="${orders == null || orders.isEmpty()}">
+          <p th:if="${tableNumber != null}">
+            Não há pedidos para a mesa selecionada.
+          </p>
+          <p th:unless="${tableNumber != null}">
+            Selecione uma mesa para visualizar os pedidos.
+          </p>
+        </div>
+
+        <div th:if="${orders != null && !orders.isEmpty()}">
+          <div th:each="order : ${orders}" class="order-card">
+            <div class="order-header">
+              <span class="order-number" th:text="'Pedido #' + ${order.id}"
+                >Pedido #123</span
+              >
+              <span
+                class="order-date"
+                th:text="${#dates.format(order.date, 'dd/MM/yyyy HH:mm')}"
+                >01/01/2023 14:30</span
+              >
+
+              <span
+                class="order-status"
+                th:classappend="${'status-' + order.status.toLowerCase()}"
+                th:text="${order.status}"
+                >Pendente</span
+              >
+            </div>
+
+            <div class="order-items">
+              <div th:each="item : ${order.items}" class="order-item">
+                <div class="item-details">
+                  <span th:text="${item.product.name + ' x ' + item.quantity}"
+                    >Produto x 1</span
+                  >
+                  <span
+                    th:if="${item.customization != null && !item.customization.isEmpty()}"
+                    class="item-customization"
+                    th:text="${item.customization}"
+                    >Instruções especiais</span
+                  >
+                </div>
+                <span
+                  th:text="${'R$' + #numbers.formatDecimal(item.product.price * item.quantity, 1, 2)}"
+                  >R$0,00</span
+                >
+              </div>
+            </div>
+
+            <div class="order-total">
+              <span>Total:</span>
+              <span
+                th:text="${'R$' + #numbers.formatDecimal(#aggregates.sum(order.items.![product.price * quantity]), 1, 2)}"
+                >R$0,00</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-content">
+        <div>
+          <p>&copy; 2023 Fumaça & Sabor. Todos os direitos reservados.</p>
+          <p style="font-size: 12px; color: #aaa; margin-top: 5px">
+            Fumaça & Sabor é uma marca fictícia criada para fins educacionais.
+            Este projeto é apenas para demonstração e aprendizado.
+          </p>
+        </div>
+        <a th:href="@{/admin/login}" class="admin-link"
+          >Painel do Administrador</a
+        >
+      </div>
+    </footer>
+
+    <script th:inline="javascript">
+      function updateCartCount() {
+        const cartCount = /*[[${session.cart != null ? session.cart.size() : 0}]]*/ 0;
+        document.getElementById("cart-count").textContent = cartCount;
+      }
+
+      updateCartCount();
+    </script>
+  </body>
+</html>
